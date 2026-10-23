@@ -18,7 +18,7 @@ kakao:
   max_messages: 6
   # GitHub Pages 주소 (예: https://<github-id>.github.io/vet-gi-digest)
   # 비워두면 PubMed 링크로 대체됩니다. 환경변수 REPORT_BASE_URL 이 우선합니다.
-  report_base_url: ""
+  report_base_url: "https://dvmhan.github.io/vet-gi-digest"
 
 claude:
   model: claude-opus-5-5
