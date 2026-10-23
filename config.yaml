@@ -1,0 +1,100 @@
+# ─────────────────────────────────────────────────────────────
+#  수의내과 학술 데일리 다이제스트 설정
+#  이 파일만 수정하면 저널/주제/메시지 수를 조정할 수 있습니다.
+# ─────────────────────────────────────────────────────────────
+
+# PubMed 검색 기간(일). 매일 실행하지만 PubMed 등록 지연을 고려해 여유를 두고,
+# 이미 보낸 논문(PMID)은 data/seen.json 으로 걸러냅니다.
+lookback_days: 3
+
+# 섹션별 최대 논문 수 (요약 비용·메시지 길이 조절)
+limits:
+  vet_gi: 15        # 수의 소화기 심층
+  vet_im: 15        # 수의 내과 일반
+  human: 10         # 사람 IBD/크론병/FMT
+
+# 카카오톡으로 보낼 최대 메시지 수 (헤드라인 1 + 논문 하이라이트)
+kakao:
+  max_messages: 6
+  # GitHub Pages 주소 (예: https://<github-id>.github.io/vet-gi-digest)
+  # 비워두면 PubMed 링크로 대체됩니다. 환경변수 REPORT_BASE_URL 이 우선합니다.
+  report_base_url: ""
+
+claude:
+  model: claude-opus-5-5
+  effort: medium
+
+# ── 수의 내과 신뢰도 높은 저널 (PubMed 저널 약어) ─────────────
+vet_journals:
+  core:          # 내과 핵심 저널 – 모든 내과 논문 수집
+    - "J Vet Intern Med"
+    - "J Am Vet Med Assoc"
+    - "J Small Anim Pract"
+    - "Vet J"
+    - "J Feline Med Surg"
+    - "Vet Rec"
+    - "Am J Vet Res"
+    - "Vet Clin North Am Small Anim Pract"
+    - "J Vet Emerg Crit Care (San Antonio)"
+    - "J Vet Cardiol"
+    - "Vet Comp Oncol"
+    - "Domest Anim Endocrinol"
+    - "Vet Pathol"
+    - "J Vet Diagn Invest"
+  extended:      # 오픈액세스/광범위 저널 – 소화기 주제일 때만 수집
+    - "Front Vet Sci"
+    - "BMC Vet Res"
+    - "Vet Sci"
+    - "Animals (Basel)"
+    - "Res Vet Sci"
+    - "Vet Q"
+    - "Anim Microbiome"
+    - "Microbiome"
+    - "Sci Rep"
+    - "PLoS One"
+
+# 소동물 대상 한정 (수의 소화기 심층 검색에 사용)
+species_filter: '(dog[tiab] OR dogs[tiab] OR canine[tiab] OR cat[tiab] OR cats[tiab] OR feline[tiab] OR "Dogs"[mh] OR "Cats"[mh])'
+
+# ── 소화기 심층 주제 (수의) ──────────────────────────────────
+# key: 메시지에 표시될 태그 / query: PubMed 검색식
+vet_gi_topics:
+  CIE:
+    label: "만성 염증성 장병증 (CIE/IBD)"
+    query: '("chronic inflammatory enteropathy"[tiab] OR "chronic enteropathy"[tiab] OR "chronic enteropathies"[tiab] OR "inflammatory bowel disease"[tiab] OR "food-responsive enteropathy"[tiab] OR "immunosuppressant-responsive enteropathy"[tiab] OR "antibiotic-responsive"[tiab] OR "steroid-responsive enteropathy"[tiab] OR "Inflammatory Bowel Diseases"[mh])'
+  PLE:
+    label: "단백소실성 장병증 (PLE)"
+    query: '("protein-losing enteropathy"[tiab] OR "protein losing enteropathy"[tiab] OR "lymphangiectasia"[tiab] OR "Protein-Losing Enteropathies"[mh] OR "hypoalbuminemia"[tiab] OR "hypoalbuminaemia"[tiab] OR "crypt lesions"[tiab])'
+  FMT:
+    label: "분변미생물이식 · 장내미생물 (FMT)"
+    query: '("fecal microbiota transplantation"[tiab] OR "faecal microbiota transplantation"[tiab] OR "fecal transplant"[tiab] OR "faecal transplant"[tiab] OR "Fecal Microbiota Transplantation"[mh] OR "dysbiosis index"[tiab] OR "intestinal microbiota"[tiab] OR "gut microbiome"[tiab] OR "fecal microbiome"[tiab] OR "faecal microbiome"[tiab])'
+  PANC:
+    label: "췌장염 · 췌장 질환"
+    query: '("pancreatitis"[tiab] OR "Pancreatitis"[mh] OR "pancreatic lipase"[tiab] OR "Spec cPL"[tiab] OR "Spec fPL"[tiab] OR "fuzapladib"[tiab] OR "exocrine pancreatic insufficiency"[tiab])'
+  GI:
+    label: "기타 소화기 (림프종·코발라민·급성설사 등)"
+    query: '("small cell lymphoma"[tiab] OR "alimentary lymphoma"[tiab] OR "intestinal lymphoma"[tiab] OR "cobalamin"[tiab] OR "acute hemorrhagic diarrhea"[tiab] OR "acute haemorrhagic diarrhoea"[tiab] OR "chronic diarrhea"[tiab] OR "chronic diarrhoea"[tiab] OR "gastroenteritis"[tiab] OR "enteropathy"[tiab] OR "gastrointestinal"[tiab])'
+
+# 수의 내과 일반 – core 저널에서 제외할 비내과 주제
+vet_im_exclude: '("surgery"[ti] OR "surgical"[ti] OR "orthopedic"[ti] OR "anesthesia"[ti] OR "anaesthesia"[ti] OR "equine"[ti] OR "horse"[ti] OR "horses"[ti] OR "bovine"[ti] OR "cattle"[ti] OR "dairy"[ti] OR "swine"[ti] OR "pig"[ti] OR "poultry"[ti] OR "sheep"[ti] OR "goat"[ti])'
+
+# ── 사람 IBD / 크론병 / FMT ─────────────────────────────────
+human_journals:
+  - "Gastroenterology"
+  - "Gut"
+  - "Lancet Gastroenterol Hepatol"
+  - "J Crohns Colitis"
+  - "Inflamm Bowel Dis"
+  - "Am J Gastroenterol"
+  - "Clin Gastroenterol Hepatol"
+  - "Nat Rev Gastroenterol Hepatol"
+  - "Aliment Pharmacol Ther"
+  - "Gut Microbes"
+  - "Cell Host Microbe"
+  - "N Engl J Med"
+  - "Lancet"
+  - "JAMA"
+  - "Nat Med"
+  - "BMJ"
+human_topics: '("inflammatory bowel disease"[tiab] OR "Inflammatory Bowel Diseases"[mh] OR "Crohn disease"[mh] OR "Crohn''s disease"[tiab] OR "ulcerative colitis"[tiab] OR "fecal microbiota transplantation"[tiab] OR "faecal microbiota transplantation"[tiab] OR "Fecal Microbiota Transplantation"[mh] OR "protein-losing enteropathy"[tiab])'
+human_exclude: '("Animals"[mh] NOT "Humans"[mh])'

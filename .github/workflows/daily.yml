@@ -1,0 +1,74 @@
+name: daily-digest
+
+on:
+  schedule:
+    # 매일 06:37 KST (= 21:37 UTC). GitHub 스케줄 지연을 감안해 7시 전에 시작
+    - cron: "37 21 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "카카오 전송 없이 테스트"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-digest
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+
+      - name: Run digest
+        env:
+          PYTHONPATH: src
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
+          KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
+          KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
+          KAKAO_NEW_TOKEN_FILE: ${{ runner.temp }}/new_refresh_token
+          NCBI_API_KEY: ${{ secrets.NCBI_API_KEY }}
+          NCBI_EMAIL: ${{ secrets.NCBI_EMAIL }}
+          REPORT_BASE_URL: ${{ vars.REPORT_BASE_URL }}
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            python -m vetdigest run --dry-run
+          else
+            python -m vetdigest run
+          fi
+
+      # 카카오 refresh token 이 갱신되면 Secret 자동 업데이트 (GH_PAT 필요)
+      - name: Rotate Kakao refresh token
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+          TOKEN_FILE: ${{ runner.temp }}/new_refresh_token
+        run: |
+          if [ -s "$TOKEN_FILE" ]; then
+            if [ -n "$GH_TOKEN" ]; then
+              gh secret set KAKAO_REFRESH_TOKEN < "$TOKEN_FILE" --repo "$GITHUB_REPOSITORY"
+              echo "KAKAO_REFRESH_TOKEN 갱신 완료"
+            else
+              echo "::warning::카카오 refresh token 이 갱신되었지만 GH_PAT 가 없어 저장하지 못했습니다. scripts/kakao_auth.py 로 재발급이 필요할 수 있습니다."
+            fi
+          fi
+
+      - name: Commit report & state
+        if: ${{ inputs.dry_run != true }}
+        run: |
+          git config user.name "vet-digest-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs data
+          git diff --cached --quiet || git commit -m "digest: $(TZ=Asia/Seoul date +%F)"
+          git push
