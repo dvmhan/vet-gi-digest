@@ -1,0 +1,25 @@
+name: kakao-setup
+
+# 카카오 연결(최초 1회 / 토큰 만료 시). 로그인 후 주소창 URL을 붙여넣어 실행합니다.
+on:
+  workflow_dispatch:
+    inputs:
+      redirect_url:
+        description: "카카오 로그인 후 주소창의 전체 URL (http://localhost:8080/?code=...)"
+        required: true
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests
+      - env:
+          REDIRECT_URL: ${{ inputs.redirect_url }}
+          KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
+          KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: python scripts/kakao_setup_ci.py
