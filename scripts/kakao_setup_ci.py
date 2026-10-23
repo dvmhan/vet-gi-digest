@@ -18,7 +18,11 @@ if s := os.environ.get("KAKAO_CLIENT_SECRET"):
     data["client_secret"] = s
 r = requests.post("https://kauth.kakao.com/oauth/token", data=data, timeout=30)
 if r.status_code != 200:
-    sys.exit(f"토큰 발급 실패: {r.text}\n→ 로그인 링크를 다시 열어 새 주소로 10분 안에 재시도하세요.")
+    hint = "로그인 링크를 다시 열어 새 주소로 10분 안에 재시도하세요."
+    if "KOE010" in r.text:
+        hint = ("앱 인증 실패: Secrets 의 KAKAO_REST_API_KEY 값을 확인하고, 카카오 앱에 클라이언트 시크릿이 켜져 있으면 "
+                "그 값을 KAKAO_CLIENT_SECRET 으로 등록하세요. (인가 코드는 1회용이니 로그인 링크도 다시 열어야 합니다)")
+    sys.exit(f"토큰 발급 실패: {r.text}\n→ {hint}")
 tok = r.json()
 for k in ("access_token", "refresh_token"):
     print(f"::add-mask::{tok[k]}")
