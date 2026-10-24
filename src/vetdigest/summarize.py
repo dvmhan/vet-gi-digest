@@ -48,7 +48,7 @@ ITEM_SCHEMA = {
 SCHEMA = {
     "type": "object",
     "properties": {
-        "section_summary": {"type": "string", "description": "이 섹션 오늘 동향 2–3문장"},
+        "section_summary": {"type": "string", "description": "이 섹션의 주요 동향 2–3문장. 논문 개수나 요약 작업 자체는 언급하지 말 것"},
         "items": {"type": "array", "items": ITEM_SCHEMA},
     },
     "required": ["section_summary", "items"],
