@@ -30,7 +30,7 @@ def test_parse():
 
 
 class FakePubMed:
-    def search(self, term, days, retmax=200):
+    def search(self, term, days, retmax=200, since=""):
         if ("fecal microbiota" in term or "chronic enteropathy" in term) and '"Dogs"[mh]' in term:
             return ["40000001"]
         return []

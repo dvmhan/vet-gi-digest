@@ -32,12 +32,13 @@ def item_message(a: Article, base: str, day: date) -> tuple[str, str, str]:
 
 
 def build_messages(sections: dict[str, list[Article]], summaries: dict[str, str],
-                   base: str, day: date, max_messages: int) -> list[tuple[str, str, str]]:
+                   base: str, day: date, max_messages: int,
+                   title: str = "수의내과 위클리") -> list[tuple[str, str, str]]:
     counts = {k: len(v) for k, v in sections.items()}
     total = sum(counts.values())
-    head = f"🩺 {day:%m/%d} 수의내과 데일리\n" + " · ".join(f"{SECTION_NAME[k]} {n}" for k, n in counts.items())
+    head = f"🩺 {day:%m/%d} {title}\n" + " · ".join(f"{SECTION_NAME[k]} {n}" for k, n in counts.items())
     if total == 0:
-        return [(head + "\n\n오늘은 새로 등록된 논문이 없습니다.", base or "https://pubmed.ncbi.nlm.nih.gov/", "열기")]
+        return [(head + "\n\n이번 주에는 새로 등록된 논문이 없습니다.", base or "https://pubmed.ncbi.nlm.nih.gov/", "열기")]
     lead = summaries.get("vet_gi") or summaries.get("vet_im") or summaries.get("human") or ""
     msgs = [(f"{head}\n\n{lead}".strip(), report_url(base, day) or "https://pubmed.ncbi.nlm.nih.gov/", "전체 리포트")]
 

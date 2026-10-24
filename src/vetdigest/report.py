@@ -53,11 +53,12 @@ def _article(a: Article, topic_labels: dict[str, str]) -> str:
 
 
 def write_report(docs: Path, day: date, sections: dict[str, list[Article]],
-                 summaries: dict[str, str], topic_labels: dict[str, str]) -> Path:
+                 summaries: dict[str, str], topic_labels: dict[str, str],
+                 title: str = "수의내과 위클리") -> Path:
     daily = docs / "daily"
     daily.mkdir(parents=True, exist_ok=True)
     total = sum(len(v) for v in sections.values())
-    body = f"<h1>🩺 수의내과 데일리</h1><p class=\"muted\">{day.isoformat()} · 신규 논문 {total}편 · <a href=\"../index.html\">지난 리포트</a></p>"
+    body = f"<h1>🩺 {escape(title)}</h1><p class=\"muted\">{day.isoformat()} · 논문 {total}편 · <a href=\"../index.html\">지난 리포트</a></p>"
     for key in ("vet_gi", "human", "vet_im"):
         arts = sections.get(key, [])
         if not arts:
@@ -67,9 +68,9 @@ def write_report(docs: Path, day: date, sections: dict[str, list[Article]],
             body += f"<p class=\"lead\">{escape(summaries[key])}</p>"
         body += "".join(_article(a, topic_labels) for a in arts)
     if total == 0:
-        body += "<p>오늘은 새로 등록된 논문이 없습니다.</p>"
+        body += "<p>이번 주에는 새로 등록된 논문이 없습니다.</p>"
     path = daily / f"{day.isoformat()}.html"
-    path.write_text(_page(f"수의내과 데일리 {day.isoformat()}", body), encoding="utf-8")
+    path.write_text(_page(f"{title} {day.isoformat()}", body), encoding="utf-8")
     _write_index(docs)
     return path
 
@@ -78,5 +79,5 @@ def _write_index(docs: Path) -> None:
     files = sorted((docs / "daily").glob("*.html"), reverse=True)
     items = "".join(f'<li><a href="daily/{f.name}">{f.stem}</a></li>' for f in files)
     (docs / "index.html").write_text(
-        _page("수의내과 데일리", f"<h1>🩺 수의내과 데일리 아카이브</h1><ul>{items}</ul>"), encoding="utf-8")
+        _page("수의내과 위클리", f"<h1>🩺 수의내과 위클리 아카이브</h1><ul>{items}</ul>"), encoding="utf-8")
     (docs / ".nojekyll").touch()

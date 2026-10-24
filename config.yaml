@@ -1,21 +1,23 @@
 # ─────────────────────────────────────────────────────────────
-#  수의내과 학술 데일리 다이제스트 설정
+#  수의내과 학술 위클리 다이제스트 설정
 #  이 파일만 수정하면 저널/주제/메시지 수를 조정할 수 있습니다.
 # ─────────────────────────────────────────────────────────────
 
-# PubMed 검색 기간(일). 매일 실행하지만 PubMed 등록 지연을 고려해 여유를 두고,
+# PubMed 검색 기간(일). 매주 월요일 실행 – 등록 지연을 고려해 하루 여유를 두고,
 # 이미 보낸 논문(PMID)은 data/seen.json 으로 걸러냅니다.
-lookback_days: 3
+lookback_days: 8
+
+title: "수의내과 위클리"
 
 # 섹션별 최대 논문 수 (요약 비용·메시지 길이 조절)
 limits:
-  vet_gi: 15        # 수의 소화기 심층
-  vet_im: 15        # 수의 내과 일반
-  human: 10         # 사람 IBD/크론병/FMT
+  vet_gi: 25        # 수의 소화기 심층
+  vet_im: 20        # 수의 내과 일반
+  human: 15         # 사람 IBD/크론병/FMT
 
 # 카카오톡으로 보낼 최대 메시지 수 (헤드라인 1 + 논문 하이라이트)
 kakao:
-  max_messages: 6
+  max_messages: 8
   # GitHub Pages 주소 (예: https://<github-id>.github.io/vet-gi-digest)
   # 비워두면 PubMed 링크로 대체됩니다. 환경변수 REPORT_BASE_URL 이 우선합니다.
   report_base_url: "https://dvmhan.github.io/vet-gi-digest"

@@ -61,11 +61,13 @@ class PubMed:
         r.raise_for_status()
         return r
 
-    def search(self, term: str, days: int, retmax: int = 200) -> list[str]:
+    def search(self, term: str, days: int, retmax: int = 300, since: str = "") -> list[str]:
+        """최근 days일(PubMed 등록일) 또는 since(YYYY-MM-DD) 이후 출판된 논문 PMID."""
+        dates = ({"datetype": "pdat", "mindate": since.replace("-", "/"), "maxdate": "3000"} if since
+                 else {"datetype": "edat", "reldate": days})
         r = self._get("esearch.fcgi", {
-            "db": "pubmed", "term": f"({term}) NOT {NON_RESEARCH}",
-            "datetype": "edat", "reldate": days, "retmax": retmax,
-            "retmode": "json", "sort": "pub_date",
+            "db": "pubmed", "term": f"({term}) NOT {NON_RESEARCH}", **dates,
+            "retmax": retmax, "retmode": "json", "sort": "pub_date",
         })
         return r.json()["esearchresult"].get("idlist", [])
 
@@ -131,6 +133,11 @@ def score(a: Article) -> float:
 def collect(cfg: dict, pm: PubMed, seen: set[str]) -> dict[str, list[Article]]:
     """세 섹션(vet_gi / vet_im / human)의 신규 논문을 수집·랭킹."""
     days = cfg["lookback_days"]
+    since = cfg.get("since", "")
+    # 기간 지정(since) 검색은 후보가 많으므로 넉넉히 받아서 랭킹으로 고름
+    search = lambda term: pm.search(term, days, 3000 if since else 300, since)  # noqa: E731
+    if cfg.get("ignore_seen"):
+        seen = set()
     vj = cfg["vet_journals"]
     all_vet = journal_clause(vj["core"] + vj["extended"])
     core = journal_clause(vj["core"])
@@ -142,7 +149,7 @@ def collect(cfg: dict, pm: PubMed, seen: set[str]) -> dict[str, list[Article]]:
         term = f"{t['query']} AND {cfg['species_filter']}"
         if not cfg.get("vet_gi_all_journals", True):
             term += f" AND {all_vet}"
-        for pmid in pm.search(term, days):
+        for pmid in search(term):
             gi_tags.setdefault(pmid, []).append(key)
     # 'GI'(기타)는 다른 주제로 이미 잡혔으면 생략
     for tags in gi_tags.values():
@@ -150,11 +157,11 @@ def collect(cfg: dict, pm: PubMed, seen: set[str]) -> dict[str, list[Article]]:
             tags.remove("GI")
 
     # 2) 수의 내과 일반: 핵심 저널 – 비내과 주제 – 소화기 중복
-    im_ids = [p for p in pm.search(f"{core} NOT {cfg['vet_im_exclude']}", days) if p not in gi_tags]
+    im_ids = [p for p in search(f"{core} NOT {cfg['vet_im_exclude']}") if p not in gi_tags]
 
     # 3) 사람 IBD/크론병/FMT
-    hu_ids = pm.search(
-        f"{cfg['human_topics']} AND {journal_clause(cfg['human_journals'])} NOT {cfg['human_exclude']}", days)
+    hu_ids = search(
+        f"{cfg['human_topics']} AND {journal_clause(cfg['human_journals'])} NOT {cfg['human_exclude']}")
 
     listed = set(vj["core"] + vj["extended"])
     sections = {"vet_gi": list(gi_tags), "vet_im": im_ids, "human": hu_ids}

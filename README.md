@@ -1,6 +1,6 @@
-# 🩺 수의내과 데일리 (vet-gi-digest)
+# 🩺 수의내과 위클리 (vet-gi-digest)
 
-전 세계 신뢰도 높은 수의 내과 저널과 사람 IBD/FMT 논문을 매일 수집하고, Claude가 한국어로 요약해서 **매일 아침 카카오톡 '나와의 채팅'** 으로 보내주는 앱입니다.
+전 세계 신뢰도 높은 수의 내과 저널과 사람 IBD/FMT 논문을 매주 수집하고, Claude가 한국어로 요약해서 **매주 월요일 아침 카카오톡 '나와의 채팅'** 으로 보내주는 앱입니다.
 
 ```
 PubMed 검색 ─▶ 랭킹(근거수준·저널) ─▶ Claude 한국어 요약 ─▶ HTML 리포트(GitHub Pages)
@@ -21,7 +21,7 @@ PubMed 검색 ─▶ 랭킹(근거수준·저널) ─▶ Claude 한국어 요약
 ## 카카오톡 메시지 예시
 
 ```
-🩺 10/23 수의내과 데일리
+🩺 10/26 수의내과 위클리
 수의 소화기 4 · 수의 내과 9 · 사람 IBD/FMT 3
 
 CIE 개에서 FMT 보조요법 RCT와 PLE 예후인자 연구가 나왔습니다…
@@ -81,9 +81,11 @@ KAKAO_REST_API_KEY=<REST API 키> python scripts/kakao_auth.py
 > **`GH_PAT` 가 필요한 이유**: 카카오 refresh token은 약 2개월 유효하고, 만료 1개월 전부터 새 토큰이 발급됩니다. 앱이 새 토큰을 받으면 GitHub Secret을 자동으로 갱신해서 **재로그인 없이 계속** 동작하게 합니다. `GH_PAT` 가 없으면 두 달마다 4단계를 다시 해야 합니다.
 
 ### 6. 테스트
-`Actions → daily-digest → Run workflow` 에서 `dry_run` 을 체크해서 실행하면 카카오 전송 없이 로그에 메시지가 찍힙니다. 문제없으면 체크 해제 후 한 번 더 실행해 카카오톡 수신을 확인하세요.
+`Actions → weekly-digest → Run workflow` 에서 `dry_run` 을 체크해서 실행하면 카카오 전송 없이 로그에 메시지가 찍힙니다. 문제없으면 체크 해제 후 한 번 더 실행해 카카오톡 수신을 확인하세요.
 
-이후 **매일 06:37(KST)** 에 자동 실행됩니다. (GitHub 스케줄은 수 분~수십 분 늦어질 수 있어 7시 전에 시작하도록 했습니다. 시간 변경은 `.github/workflows/daily.yml` 의 `cron` 을 UTC 기준으로 수정하세요.)
+이후 **매주 월요일 06:37(KST)** 에 최근 1주일 논문으로 자동 실행됩니다.
+
+**특별 검색**: Run workflow 에서 `since` 에 날짜(예: `2026-01-01`)를 넣으면 그 이후 출판된 논문 중 상위 논문을 골라 보냅니다. `ignore_seen` 을 체크하면 이미 받은 논문도 다시 포함합니다. (GitHub 스케줄은 수 분~수십 분 늦어질 수 있어 7시 전에 시작하도록 했습니다. 시간 변경은 `.github/workflows/weekly.yml` 의 `cron` 을 UTC 기준으로 수정하세요.)
 
 ---
 
@@ -115,7 +117,7 @@ src/vetdigest/compose.py     카카오 메시지 구성 (200자 제한 대응)
 src/vetdigest/kakao.py       카카오 토큰 갱신·나에게 보내기
 src/vetdigest/report.py      HTML 리포트/아카이브
 scripts/kakao_auth.py        최초 refresh token 발급
-.github/workflows/daily.yml  매일 아침 자동 실행 + 토큰 자동 갱신 + 리포트 커밋
+.github/workflows/weekly.yml  매주 월요일 자동 실행 + 토큰 자동 갱신 + 리포트 커밋
 ```
 
 ## 한계 / 참고

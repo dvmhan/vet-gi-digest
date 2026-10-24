@@ -45,7 +45,7 @@ for k in ("access_token", "refresh_token"):
 if "talk_message" not in tok.get("scope", ""):
     fail("'카카오톡 메시지 전송' 동의가 빠졌습니다. 로그인 링크를 다시 열어 체크 후 재시도하세요.")
 
-tmpl = {"object_type": "text", "text": "✅ 수의내과 데일리 카카오톡 연결 완료!\n내일 아침부터 논문 요약이 도착합니다.",
+tmpl = {"object_type": "text", "text": "✅ 수의내과 위클리 카카오톡 연결 완료!\n매주 월요일 아침에 논문 요약이 도착합니다.",
         "link": {"web_url": "https://pubmed.ncbi.nlm.nih.gov/", "mobile_web_url": "https://pubmed.ncbi.nlm.nih.gov/"}}
 m = requests.post("https://kapi.kakao.com/v2/api/talk/memo/default/send",
                   headers={"Authorization": f"Bearer {tok['access_token']}"},
