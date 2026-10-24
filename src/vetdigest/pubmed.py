@@ -136,9 +136,12 @@ def collect(cfg: dict, pm: PubMed, seen: set[str]) -> dict[str, list[Article]]:
     core = journal_clause(vj["core"])
 
     # 1) 수의 소화기 심층: 주제별 검색 → 태그 부여
+    #    논문 수가 적어 저널 제한 없이 검색하고, 목록 밖 저널은 랭킹에서 감점
     gi_tags: dict[str, list[str]] = {}
     for key, t in cfg["vet_gi_topics"].items():
-        term = f"{t['query']} AND {cfg['species_filter']} AND {all_vet}"
+        term = f"{t['query']} AND {cfg['species_filter']}"
+        if not cfg.get("vet_gi_all_journals", True):
+            term += f" AND {all_vet}"
         for pmid in pm.search(term, days):
             gi_tags.setdefault(pmid, []).append(key)
     # 'GI'(기타)는 다른 주제로 이미 잡혔으면 생략
@@ -153,6 +156,7 @@ def collect(cfg: dict, pm: PubMed, seen: set[str]) -> dict[str, list[Article]]:
     hu_ids = pm.search(
         f"{cfg['human_topics']} AND {journal_clause(cfg['human_journals'])} NOT {cfg['human_exclude']}", days)
 
+    listed = set(vj["core"] + vj["extended"])
     sections = {"vet_gi": list(gi_tags), "vet_im": im_ids, "human": hu_ids}
     result: dict[str, list[Article]] = {}
     for sec, ids in sections.items():
@@ -162,6 +166,8 @@ def collect(cfg: dict, pm: PubMed, seen: set[str]) -> dict[str, list[Article]]:
             a.section = sec
             a.tags = gi_tags.get(a.pmid, []) if sec == "vet_gi" else []
             a.score = score(a)
+            if sec == "vet_gi" and a.journal not in listed:
+                a.score -= 1.5
         arts = [a for a in arts if a.abstract or a.score > 2]
         arts.sort(key=lambda a: a.score, reverse=True)
         result[sec] = arts[: cfg["limits"][sec]]

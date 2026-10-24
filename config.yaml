@@ -53,6 +53,10 @@ vet_journals:
     - "Sci Rep"
     - "PLoS One"
 
+# 수의 소화기 심층은 논문 수가 적어(하루 0~3편) 모든 저널에서 검색하고,
+# 위 저널 목록에 없는 곳은 순위를 낮춥니다. false 로 바꾸면 목록 저널만 검색합니다.
+vet_gi_all_journals: true
+
 # 소동물 대상 한정 (수의 소화기 심층 검색에 사용)
 species_filter: '(dog[tiab] OR dogs[tiab] OR canine[tiab] OR cat[tiab] OR cats[tiab] OR feline[tiab] OR "Dogs"[mh] OR "Cats"[mh])'
 
