@@ -91,16 +91,20 @@ class Summarizer:
                 msg = stream.get_final_message()
         except anthropic.RateLimitError as e:
             log.error("Claude 요청 한도 초과: %s", e)
+            print(f"::warning::Claude 요청 한도 초과 ({section})")
             return ""
         except anthropic.APIStatusError as e:
             log.error("Claude API 오류 %s: %s", e.status_code, e.message)
+            print(f"::warning::Claude API 오류 {e.status_code} ({section}): {e.message}")
             return ""
         except anthropic.APIConnectionError as e:
             log.error("Claude 연결 실패: %s", e)
+            print(f"::warning::Claude 연결 실패 ({section})")
             return ""
 
         if msg.stop_reason in ("refusal", "max_tokens"):
             log.error("요약 중단 (stop_reason=%s)", msg.stop_reason)
+            print(f"::warning::요약 중단 stop_reason={msg.stop_reason} ({section})")
             return ""
         text = next((b.text for b in msg.content if b.type == "text"), "")
         data = json.loads(text)

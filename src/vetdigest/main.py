@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 from datetime import date, datetime, timedelta, timezone
 
 from .compose import build_messages
@@ -41,6 +42,8 @@ def run(dry_run: bool, no_kakao: bool) -> None:
     labels = {k: v["label"] for k, v in cfg["vet_gi_topics"].items()}
     path = write_report(ROOT / "docs", today, sections, summaries, labels)
     log.info("리포트 저장: %s", path)
+    counts = ", ".join(f"{k}={len(v)}" for k, v in sections.items())
+    gh_annotate("notice", f"수집 {counts} / Claude 요약 {'사용' if summarizer.enabled else '미사용(키 없음)'}")
 
     base = cfg["kakao"]["report_base_url"]
     messages = build_messages(sections, summaries, base, today, cfg["kakao"]["max_messages"])
@@ -50,7 +53,7 @@ def run(dry_run: bool, no_kakao: bool) -> None:
     else:
         kakao = KakaoClient()
         if not kakao.configured:
-            raise SystemExit("KAKAO_REST_API_KEY / KAKAO_REFRESH_TOKEN 이 설정되지 않았습니다.")
+            raise RuntimeError("KAKAO_REST_API_KEY / KAKAO_REFRESH_TOKEN 이 설정되지 않았습니다. kakao-setup 을 먼저 실행하세요.")
         for text, url, btn in messages:
             kakao.send_text(text, url, btn)
         log.info("카카오톡 %d건 전송 완료", len(messages))
@@ -65,9 +68,15 @@ def run(dry_run: bool, no_kakao: bool) -> None:
 def kakao_test() -> None:
     kakao = KakaoClient()
     if not kakao.configured:
-        raise SystemExit("KAKAO_REST_API_KEY / KAKAO_REFRESH_TOKEN 이 설정되지 않았습니다.")
+        raise RuntimeError("KAKAO_REST_API_KEY / KAKAO_REFRESH_TOKEN 이 설정되지 않았습니다.")
     kakao.send_text("✅ 수의내과 데일리 연결 테스트 메시지입니다.", "https://pubmed.ncbi.nlm.nih.gov/", "PubMed")
     print("전송 완료 – 카카오톡 '나와의 채팅'을 확인하세요.")
+
+
+def gh_annotate(level: str, msg: str) -> None:
+    """GitHub Actions 실행 화면 상단에 요약/오류를 표시."""
+    if os.environ.get("GITHUB_ACTIONS"):
+        print(f"::{level}::" + msg.replace("%", "%25").replace("\r", "").replace("\n", "%0A"))
 
 
 def cli() -> None:
@@ -79,10 +88,15 @@ def cli() -> None:
     r.add_argument("--no-kakao", action="store_true", help="리포트·상태는 저장하되 카카오 전송만 생략")
     sub.add_parser("kakao-test", help="카카오톡 테스트 메시지 전송")
     args = p.parse_args()
-    if args.cmd == "run":
-        run(args.dry_run, args.no_kakao)
-    else:
-        kakao_test()
+    try:
+        if args.cmd == "run":
+            run(args.dry_run, args.no_kakao)
+        else:
+            kakao_test()
+    except Exception as e:
+        log.exception("실패")
+        gh_annotate("error", f"{type(e).__name__}: {e}")
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":
