@@ -60,7 +60,10 @@ vet_journals:
 vet_gi_all_journals: true
 
 # 소동물 대상 한정 (수의 소화기 심층 검색에 사용)
-species_filter: '(dog[tiab] OR dogs[tiab] OR canine[tiab] OR cat[tiab] OR cats[tiab] OR feline[tiab] OR "Dogs"[mh] OR "Cats"[mh])'
+species_filter: '(dog[ti] OR dogs[ti] OR canine[ti] OR puppies[ti] OR cat[ti] OR cats[ti] OR feline[ti] OR kittens[ti] OR "Dogs"[mh] OR "Cats"[mh] OR "client-owned dogs"[tiab] OR "client-owned cats"[tiab] OR "dogs and cats"[tiab])'
+
+# 개·고양이 외 동물/실험동물이 제목에 있으면 제외 (수의 소화기·내과 공통)
+other_species_exclude: '(equine[ti] OR horse[ti] OR horses[ti] OR foal[ti] OR foals[ti] OR mare[ti] OR mares[ti] OR bovine[ti] OR cattle[ti] OR cow[ti] OR cows[ti] OR calf[ti] OR calves[ti] OR dairy[ti] OR ruminant[ti] OR swine[ti] OR pig[ti] OR pigs[ti] OR piglet[ti] OR piglets[ti] OR porcine[ti] OR poultry[ti] OR chicken[ti] OR chickens[ti] OR broiler[ti] OR broilers[ti] OR hens[ti] OR quail[ti] OR duck[ti] OR ducks[ti] OR avian[ti] OR bird[ti] OR birds[ti] OR sheep[ti] OR ovine[ti] OR lamb[ti] OR lambs[ti] OR goat[ti] OR goats[ti] OR caprine[ti] OR camel[ti] OR camels[ti] OR rabbit[ti] OR rabbits[ti] OR fish[ti] OR shrimp[ti] OR mice[ti] OR mouse[ti] OR murine[ti] OR rat[ti] OR rats[ti] OR wildlife[ti] OR zoo[ti])'
 
 # ── 소화기 심층 주제 (수의) ──────────────────────────────────
 # key: 메시지에 표시될 태그 / query: PubMed 검색식
@@ -82,7 +85,7 @@ vet_gi_topics:
     query: '("small cell lymphoma"[tiab] OR "alimentary lymphoma"[tiab] OR "intestinal lymphoma"[tiab] OR "cobalamin"[tiab] OR "acute hemorrhagic diarrhea"[tiab] OR "acute haemorrhagic diarrhoea"[tiab] OR "chronic diarrhea"[tiab] OR "chronic diarrhoea"[tiab] OR "gastroenteritis"[tiab] OR "enteropathy"[tiab] OR "gastrointestinal"[tiab])'
 
 # 수의 내과 일반 – core 저널에서 제외할 비내과 주제
-vet_im_exclude: '("surgery"[ti] OR "surgical"[ti] OR "orthopedic"[ti] OR "anesthesia"[ti] OR "anaesthesia"[ti] OR "equine"[ti] OR "horse"[ti] OR "horses"[ti] OR "bovine"[ti] OR "cattle"[ti] OR "dairy"[ti] OR "swine"[ti] OR "pig"[ti] OR "poultry"[ti] OR "sheep"[ti] OR "goat"[ti])'
+vet_im_exclude: '("surgery"[ti] OR "surgical"[ti] OR "orthopedic"[ti] OR "anesthesia"[ti] OR "anaesthesia"[ti])'
 
 # ── 사람 IBD / 크론병 / FMT ─────────────────────────────────
 human_journals:

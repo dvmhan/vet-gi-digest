@@ -146,7 +146,7 @@ def collect(cfg: dict, pm: PubMed, seen: set[str]) -> dict[str, list[Article]]:
     #    논문 수가 적어 저널 제한 없이 검색하고, 목록 밖 저널은 랭킹에서 감점
     gi_tags: dict[str, list[str]] = {}
     for key, t in cfg["vet_gi_topics"].items():
-        term = f"{t['query']} AND {cfg['species_filter']}"
+        term = f"{t['query']} AND {cfg['species_filter']} NOT {cfg['other_species_exclude']}"
         if not cfg.get("vet_gi_all_journals", True):
             term += f" AND {all_vet}"
         for pmid in search(term):
@@ -157,7 +157,7 @@ def collect(cfg: dict, pm: PubMed, seen: set[str]) -> dict[str, list[Article]]:
             tags.remove("GI")
 
     # 2) 수의 내과 일반: 핵심 저널 – 비내과 주제 – 소화기 중복
-    im_ids = [p for p in search(f"{core} NOT {cfg['vet_im_exclude']}") if p not in gi_tags]
+    im_ids = [p for p in search(f"{core} NOT {cfg['vet_im_exclude']} NOT {cfg['other_species_exclude']}") if p not in gi_tags]
 
     # 3) 사람 IBD/크론병/FMT
     hu_ids = search(
