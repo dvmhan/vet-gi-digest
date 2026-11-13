@@ -71,8 +71,11 @@ def kakao_test() -> None:
     kakao = KakaoClient()
     if not kakao.configured:
         raise RuntimeError("KAKAO_REST_API_KEY / KAKAO_REFRESH_TOKEN 이 설정되지 않았습니다.")
-    kakao.send_text("✅ 수의내과 위클리 연결 테스트 메시지입니다.", "https://pubmed.ncbi.nlm.nih.gov/", "PubMed")
+    stamp = datetime.now(KST).strftime("%m/%d %H:%M")
+    kakao.send_text(f"🔔 수의내과 위클리 테스트 ({stamp})\n이 메시지가 보이면 카카오톡 연결이 정상입니다.",
+                    "https://dvmhan.github.io/vet-gi-digest/", "리포트 보기")
     print("전송 완료 – 카카오톡 '나와의 채팅'을 확인하세요.")
+    gh_annotate("notice", f"카카오 테스트 메시지 전송 성공 ({stamp} KST) – 카카오 서버가 정상 접수함")
 
 
 def gh_annotate(level: str, msg: str) -> None:

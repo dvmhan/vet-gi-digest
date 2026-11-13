@@ -6,6 +6,10 @@ on:
     - cron: "37 21 * * 0"
   workflow_dispatch:
     inputs:
+      kakao_test:
+        description: "카카오톡 테스트 메시지만 보내기 (논문 검색 안 함)"
+        type: boolean
+        default: false
       dry_run:
         description: "카카오 전송 없이 테스트"
         type: boolean
@@ -52,6 +56,10 @@ jobs:
           SINCE: ${{ inputs.since }}
           IGNORE_SEEN: ${{ inputs.ignore_seen }}
         run: |
+          if [ "${{ inputs.kakao_test }}" = "true" ]; then
+            python -m vetdigest kakao-test
+            exit 0
+          fi
           args=""
           [ "${{ inputs.dry_run }}" = "true" ] && args="$args --dry-run"
           [ -n "$SINCE" ] && args="$args --since $SINCE"
@@ -75,7 +83,7 @@ jobs:
           fi
 
       - name: Commit report & state
-        if: ${{ always() && inputs.dry_run != true }}
+        if: ${{ always() && inputs.dry_run != true && inputs.kakao_test != true }}
         run: |
           git config user.name "vet-digest-bot"
           git config user.email "actions@users.noreply.github.com"
